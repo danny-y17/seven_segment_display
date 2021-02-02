@@ -1,0 +1,240 @@
+#NAME: DANNY YOU
+#DATE: 11/3/2020
+
+#set up data
+.data
+a: .word 0    #a
+b: .word 99    #b
+
+.text
+main:
+#a into $s1, b into $s2
+lw $s1,a #load a s1=a
+lw $s2,b #load b s2=b
+
+#if a less than 0 exit	
+blt $t0,$zero,Exit	
+
+#if b greater than 99 exit
+bgt $t1,99,Exit
+
+#if a is greater than b exit
+slt $t9,$s1,$s2
+beq $t9,$zero,Exit
+
+#division
+addi $t0,$zero,10
+div $s1,$t0
+mflo $s3    #quotient for digit
+mfhi $s4    #remainder for digit
+
+While:
+#while part
+sle $t9,$s1,$s2 #a<=b;
+beqz $t9,Exit
+
+#call left display
+addi $a1,$zero,0    #left side
+slti $t3,$s3,1 #if s3<1, quotient<1
+bne $t3,$zero,skipLeftDisplay
+add $a0,$zero,$s3    #quotient display(digits3,0)
+jal Display
+
+
+skipLeftDisplay:
+add $a0,$zero,$s4    #remainder
+addi $a1,$zero,1    #right side
+#call right display
+jal Display
+jal Delay
+
+
+addi $s1,$s1,1    # a++
+#if remainder < 9
+slti $t9,$s4,9  #if the remainder is less than 9
+beq $t9,$zero,Else
+addi $s4,$s4,1    #remainder ++
+j While
+
+Else:
+li $s4,0 #get 0
+addi $s3,$s3,1    #quotient++
+j While
+
+
+Exit:
+#terminate 
+li $v0,10
+syscall
+
+#delay function, for loop
+Delay:
+add $t9,$zero,$zero	# i = 0
+loop:
+beq $t9,100,return	# if i = 100, go to return
+addi $t9,$t9,1		# else add 1
+j loop
+#return to main
+return:
+jr $ra
+
+Display:
+#if a1 = 0 then go to left
+beqz $a1,left
+
+#if a1 = 1 then go to right
+addi $t9,$zero,1
+beq $a1,$t9,right
+
+
+###left address and their numbers on 7 segment display###
+left:
+addi $t1,$zero,1
+bne $a0,$t1,twoL	#branch to 2 is not equal to a0
+la $t0,0xFFFF0011	#load address of left display
+li $v1,0x06		#load hex for 7 segment display for digit
+sb $v1,($t0)		#store byte to display
+jr $ra			#return to main
+
+twoL:
+addi $t1,$zero,2
+bne $a0,$t1,threeL
+la $t0,0xFFFF0011
+li $v1,0x5B
+sb $v1,($t0)
+jr $ra
+
+threeL:
+addi $t1,$zero,3
+bne $a0,$t1,fourL
+la $t0,0xFFFF0011
+li $v1,0x4F
+sb $v1,($t0)
+jr $ra
+
+fourL:
+addi $t1,$zero,4
+bne $a0,$t1,fiveL
+la $t0,0xFFFF0011
+li $v1,0x66
+sb $v1,($t0)
+jr $ra
+
+fiveL:
+addi $t1,$zero,5
+bne $a0,$t1,sixL
+la $t0,0xFFFF0011
+li $v1,0x6D
+sb $v1,($t0)
+jr $ra
+
+sixL:
+addi $t1,$zero,6
+bne $a0,$t1,sevenL
+la $t0,0xFFFF0011
+li $v1,0x7D
+sb $v1,($t0)
+jr $ra
+
+sevenL:
+addi $t1,$zero,7
+bne $a0,$t1,eightL
+la $t0,0xFFFF0011
+li $v1,0x07
+sb $v1,($t0)
+jr $ra
+
+eightL:
+addi $t1,$zero,8
+bne $a0,$t1,nineL
+la $t0,0xFFFF0011
+li $v1,0x7F
+sb $v1,($t0)
+jr $ra
+
+nineL:
+la $t0,0xFFFF0011
+li $v1,0x6F
+sb $v1,($t0)
+jr $ra
+
+
+###right address and their numbers on seven segment display###
+right:
+
+addi $t1,$zero,0
+bne $a0,$t1,oneR	#branch to one if not equal to a0
+la $t0,0xFFFF0010	#load right address
+li $v1,0x3F		#load hex for 7 segment display
+sb $v1,($t0)		#store byte for to display
+jr $ra			#return to main
+
+oneR:
+addi $t1,$zero,1	
+bne $a0,$t1,twoR
+la $t0,0xFFFF0010
+li $v1,0x06
+sb $v1,($t0)
+jr $ra
+
+twoR:
+addi $t1,$zero,2
+bne $a0,$t1,threeR
+la $t0,0xFFFF0010
+li $v1,0x5B
+sb $v1,($t0)
+jr $ra
+
+threeR:
+addi $t1,$zero,3
+bne $a0,$t1,fourR
+la $t0,0xFFFF0010
+li $v1,0x4F
+sb $v1,($t0)
+jr $ra
+
+fourR:
+addi $t1,$zero,4
+bne $a0,$t1,fiveR
+la $t0,0xFFFF0010
+li $v1,0x66
+sb $v1,($t0)
+jr $ra
+
+fiveR:
+addi $t1,$zero,5
+bne $a0,$t1,sixR
+la $t0,0xFFFF0010
+li $v1,0x6D
+sb $v1,($t0)
+jr $ra
+
+sixR:
+addi $t1,$zero,6
+bne $a0,$t1,sevenR
+la $t0,0xFFFF0010
+li $v1,0x7D
+sb $v1,($t0)
+jr $ra
+
+sevenR:
+addi $t1,$zero,7
+bne $a0,$t1,eightR
+la $t0,0xFFFF0010
+li $v1,0x07
+sb $v1,($t0)
+jr $ra
+
+eightR:
+addi $t1,$zero,8
+bne $a0,$t1,nineR
+la $t0,0xFFFF0010
+li $v1,0x7F
+sb $v1,($t0)
+jr $ra
+
+nineR:
+la $t0,0xFFFF0010
+li $v1,0x6F
+sb $v1,($t0)
+jr $ra
